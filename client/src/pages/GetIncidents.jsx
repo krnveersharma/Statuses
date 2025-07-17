@@ -1,5 +1,5 @@
 import { Card } from '../../components/ui/Card';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useOrganization } from '@clerk/clerk-react';
 import { Button } from '../../components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
@@ -13,6 +13,7 @@ export default function GetIncidentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const wsRef = useRef(null);
+  const {organization}=useOrganization()
 
   const fetchIncidents = async () => {
     setLoading(true);
@@ -46,7 +47,7 @@ export default function GetIncidentsPage() {
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
-        if (msg.type === 'incident_created' || msg.type === 'incident_updated') {
+        if (msg.type === organization?.id+'_incident_created' || msg.type === organization?.id+'_incident_updated') {
           fetchIncidents();
         }
       } catch (e) {
@@ -69,8 +70,8 @@ export default function GetIncidentsPage() {
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {incidents.length === 0 && !loading && <div>No incidents found.</div>}
-        {incidents.map((incident) => (
+        {incidents?.length === 0 && !loading && <div>No incidents found.</div>}
+        {incidents?.map((incident) => (
           <Card key={incident.id}>
             <div className="p-4">
               <div className="font-semibold">{incident.title}</div>

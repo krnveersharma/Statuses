@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useOrganization } from "@clerk/clerk-react";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/button";
 import { getuser } from "../api/getUserInfo";
@@ -12,6 +12,8 @@ const ViewService = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const wsRef = useRef(null);
+  const {organization}=useOrganization()
+
   const [userRole, setUserRole] = useState("");
   const [userLoading, setUserLoading] = useState(true);
   const [service, setService] = useState(null);
@@ -62,7 +64,7 @@ const ViewService = () => {
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          if (msg.type === "service_updated_" + id) {
+          if (msg.type === organization?.id+"_service_updated_" + id) {
             console.log("edit event triggered");
             fetchService();
             fetchUserRole();

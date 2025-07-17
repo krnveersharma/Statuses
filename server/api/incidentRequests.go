@@ -62,7 +62,7 @@ func (a *Api) CreateIncident(ctx *gin.Context) {
 	a.UpdateIncidentUpdate(&newIncident, *clerkUser)
 
 	// Broadcast to websockets
-	websocketsHandler.CreateIncident(newIncident)
+	websocketsHandler.CreateIncident(clerkUser.Org.ID, newIncident)
 
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Incident created successfully"})
 }
@@ -168,7 +168,7 @@ func (a *Api) EditIncident(ctx *gin.Context) {
 	a.UpdateIncidentUpdate(&incident, *clerkUser)
 
 	// Broadcast to websockets
-	websocketsHandler.UpdateIncident(incident.ID, incident)
+	websocketsHandler.UpdateIncident(incident.ID, clerkUser.Org.ID, incident)
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Incident updated successfully"})
 }

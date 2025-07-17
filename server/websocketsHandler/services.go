@@ -7,21 +7,21 @@ import (
 	Schemas "github.com/krnveersharma/Statuses/schemas"
 )
 
-func UpdateService(serviceId string, service Schemas.Service) {
+func UpdateService(serviceId, orgId string, service Schemas.Service) {
 	msg, _ := json.Marshal(map[string]interface{}{
-		"type":    "service_updated_" + serviceId,
+		"type":    orgId + "_service_updated_" + serviceId,
 		"service": service,
 	})
 	realtime.Broadcast(msg)
-	CreateService(Schemas.ServiceRequest{
+	CreateService(orgId, Schemas.ServiceRequest{
 		Name:   service.Name,
 		Status: service.Status,
 	})
 }
 
-func CreateService(service Schemas.ServiceRequest) {
+func CreateService(orgId string, service Schemas.ServiceRequest) {
 	msg, _ := json.Marshal(map[string]interface{}{
-		"type":    "service_created",
+		"type":    orgId + "_service_created",
 		"service": service,
 	})
 	realtime.Broadcast(msg)

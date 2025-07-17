@@ -1,6 +1,6 @@
 import { Layout } from "@/components/ui/Layout";
 import { Card } from '../../components/ui/Card';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useOrganization } from '@clerk/clerk-react';
 import { Button } from '../../components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState, useRef } from 'react';
@@ -14,6 +14,7 @@ export default function GetServicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const wsRef = useRef(null);
+  const {organization}=useOrganization()
 
   const fetchServices = async () => {
     setLoading(true);
@@ -47,7 +48,7 @@ export default function GetServicesPage() {
       try {
         const msg = JSON.parse(event.data);
         console.log("message from websockets is:",msg)
-        if (msg.type === 'service_created' || msg.type === 'service_updated') {
+        if (msg.type === organization?.id+'_service_created' || msg.type === organization?.id+'_service_updated') {
           fetchServices();
         }
       } catch (e) {
@@ -69,8 +70,8 @@ export default function GetServicesPage() {
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.length === 0 && !loading && <div>No services found.</div>}
-        {services.map((service) => (
+        {services?.length === 0 && !loading && <div>No services found.</div>}
+        {services?.map((service) => (
           <Card key={service.id}>
             <div className="p-4">
               <div className="font-semibold">{service.name}</div>

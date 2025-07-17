@@ -44,7 +44,7 @@ func (a *Api) CreateService(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"error": "New Service added"})
 
 	// Broadcast to websockets
-	websocketsHandler.CreateService(ServiceRequest)
+	websocketsHandler.CreateService(clerkUser.Org.ID, ServiceRequest)
 }
 
 func (a *Api) GetServices(ctx *gin.Context) {
@@ -145,5 +145,5 @@ func (a *Api) EditService(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Service Updated Successfully"})
 
 	// Broadcast to websockets
-	websocketsHandler.UpdateService(strconv.Itoa(service.ID), service)
+	websocketsHandler.UpdateService(strconv.Itoa(service.ID), clerkUser.Org.ID, service)
 }

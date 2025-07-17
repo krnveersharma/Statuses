@@ -1,7 +1,7 @@
 import { Layout } from "@/components/ui/Layout";
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useOrganization } from "@clerk/clerk-react";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/button";
 import { fetchIncidentById } from "../api/incidentApi";
@@ -20,6 +20,7 @@ const EditIncident = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { getToken } = useAuth();
+  const { organization } = useOrganization();
 
   const wsRef = useRef(null);
   const [incident, setIncident] = useState(null);
@@ -101,7 +102,7 @@ const EditIncident = () => {
       try {
         const msg = JSON.parse(event.data);
         console.log("event triggered: ", event.data);
-        if (msg.type === "incident_updated_" + id) {
+        if (msg.type === organization?.id+"_incident_updated_" + id) {
           console.log("edit event triggered 2");
           loadIncident();
           loadServices();

@@ -7,18 +7,18 @@ import (
 	Schemas "github.com/krnveersharma/Statuses/schemas"
 )
 
-func UpdateIncident(incidentId string, incident Schemas.EditInstance) {
+func UpdateIncident(incidentId, orgId string, incident Schemas.EditInstance) {
 	msg, _ := json.Marshal(map[string]interface{}{
-		"type":    "service_created",
+		"type":    orgId + "_service_created",
 		"service": incident,
 	})
 	realtime.Broadcast(msg)
-	CreateIncident(incident)
+	CreateIncident(orgId, incident)
 }
 
-func CreateIncident(newIncident Schemas.EditInstance) {
+func CreateIncident(orgId string, newIncident Schemas.EditInstance) {
 	msg, _ := json.Marshal(map[string]interface{}{
-		"type":     "incident_created",
+		"type":     orgId + "_incident_created",
 		"incident": newIncident,
 	})
 	realtime.Broadcast(msg)
