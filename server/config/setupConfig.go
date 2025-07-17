@@ -11,6 +11,7 @@ type Config struct {
 	Port                string
 	ClerkPublishableKey string
 	ClerkSecretKey      string
+	AllowedHost         string
 }
 
 func SetupConfig() *Config {
@@ -20,5 +21,6 @@ func SetupConfig() *Config {
 		Port:                os.Getenv("PORT"),
 		ClerkPublishableKey: os.Getenv("CLERK_PUBLISHABLE_KEY"),
 		ClerkSecretKey:      os.Getenv("CLERK_SECRET_KEY"),
+		AllowedHost:         os.Getenv("ALLOWED_HOST"),
 	}
 }
