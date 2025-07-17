@@ -9,7 +9,7 @@ import (
 
 func UpdateIncident(incidentId, orgId string, incident Schemas.EditInstance) {
 	msg, _ := json.Marshal(map[string]interface{}{
-		"type":    orgId + "_service_created",
+		"type":    orgId + "_incident_updated_" + incidentId,
 		"service": incident,
 	})
 	realtime.Broadcast(msg)

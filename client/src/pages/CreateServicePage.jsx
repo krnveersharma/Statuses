@@ -41,7 +41,7 @@ export default function CreateServicePage() {
   };
 
   return (
-      <Card>
+      <Card className={"p-4"}>
         <h2 className="text-2xl font-semibold mb-4">Create Service</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>

@@ -124,8 +124,8 @@ const EditIncident = () => {
 
   return (
     <>
-      <Card>
-        <h1 className="text-2xl font-bold mb-4">Edit Incident</h1>
+      <Card className={"p-4"}>
+        <h1 className="text-2xl font-bold mb-4">Edit Incidence: {incident?.title}</h1>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
