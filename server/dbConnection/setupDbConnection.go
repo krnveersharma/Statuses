@@ -16,7 +16,7 @@ func SetupDbConnection(config config.Config) (*sql.DB, error) {
 
 	err = db.Ping()
 	if err != nil {
-		return nil, errors.New("Unable to connect to the database")
+		return nil, errors.New("Unable to connect to the database " + err.Error())
 	}
 
 	return db, nil
