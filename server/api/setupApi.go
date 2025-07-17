@@ -29,7 +29,7 @@ func SetupApi(config config.Config) error {
 		return errors.New("PORT is not set")
 	}
 
-	service, err := middlewares.InitService(config.ClerkSecretKey) // <-- You’ll export this
+	service, err := middlewares.InitService(config.ClerkSecretKey)
 	if err != nil {
 		log.Fatalf("Failed to initialize Clerk service: %v", err)
 	}
@@ -67,6 +67,6 @@ func SetupApi(config config.Config) error {
 	// Add WebSocket endpoint
 	server.GET("/ws", websocketsHandler.WebSocketHandler)
 
-	server.Run(config.Port)
+	server.Run("0.0.0.0:" + config.Port)
 	return nil
 }
