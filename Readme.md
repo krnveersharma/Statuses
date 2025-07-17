@@ -19,7 +19,7 @@ Statuses is a system for tracking incidents, services in an organization. This p
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/krnveersharma/Statuses.git
 cd Statuses
 ```
 
@@ -34,9 +34,6 @@ cp .env.example .env   # Edit .env with your DB credentials
 
 # Install dependencies (if using Go modules)
 go mod tidy
-
-# Run database migrations if any (customize as needed)
-# go run migrate.go
 
 # Start the server
 go run main.go
@@ -104,7 +101,7 @@ VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 
 ### 6. Database
 
-- Ensure your PostgreSQL database is running and matches the schema described above.
+- Ensure your PostgreSQL database is running and matches the schema described below.
 - You can use Supabase or a local Postgres instance.
 
 
