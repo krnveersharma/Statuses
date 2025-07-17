@@ -32,7 +32,7 @@ export default function ServiceDashboard() {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <h2 className="text-xl font-semibold text-muted-foreground">Service Dashboard</h2>
         <Link to="/create-service">
           <Button>Create Service</Button>
@@ -40,7 +40,7 @@ export default function ServiceDashboard() {
       </div>
       {loading && <div>Loading...</div>}
       {error && <div style={{ color: 'red' }}>{error}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {services.length === 0 && !loading && <div>No services found.</div>}
         {services.map((service) => (
           <Card key={service.id}>

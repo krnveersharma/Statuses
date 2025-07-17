@@ -98,9 +98,9 @@ export default function CreateIncidentPage() {
   }, []);
 
   return (
-    <Card className={"p-4"}>
+    <Card className={"p-4 sm:p-6"}>
       <h2 className="text-2xl font-semibold mb-4">Create Incident</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-6">
         <div>
           <label className="font-semibold block mb-1">Title</label>
           <input

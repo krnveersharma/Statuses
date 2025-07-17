@@ -129,13 +129,13 @@ const EditService = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-10">
-      <Card className="p-6 shadow-md rounded-2xl space-y-6">
+    <div className="max-w-3xl mx-auto mt-4 sm:mt-10">
+      <Card className="p-4 sm:p-6 shadow-md rounded-2xl space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Edit Service</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-6">
           <input
             name="name"
             placeholder="Service Name"

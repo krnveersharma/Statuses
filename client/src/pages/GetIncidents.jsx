@@ -1,13 +1,24 @@
-import { useAuth, useOrganization } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
-import React, { useEffect, useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Eye, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-
+import { useAuth, useOrganization } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Plus,
+  Eye,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
+import {
+  Wrench,
+  XOctagon,
+  CircleCheckBig
+} from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -16,13 +27,13 @@ export default function GetIncidentsPage() {
   const { getToken } = useAuth();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const wsRef = useRef(null);
-  const {organization}=useOrganization()
+  const { organization } = useOrganization();
 
   const fetchIncidents = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const token = await getToken();
       const res = await fetch(`${API_BASE_URL}/user/get-incidents`, {
@@ -31,12 +42,12 @@ export default function GetIncidentsPage() {
         },
       });
 
-      if (!res.ok) throw new Error('Failed to fetch incidents');
+      if (!res.ok) throw new Error("Failed to fetch incidents");
 
       const data = await res.json();
       setIncidents(data);
     } catch (err) {
-      setError(err.message || 'Unexpected error');
+      setError(err.message || "Unexpected error");
     } finally {
       setLoading(false);
     }
@@ -45,15 +56,23 @@ export default function GetIncidentsPage() {
   useEffect(() => {
     fetchIncidents();
     // Setup WebSocket connection
-    const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
-    const wsUrl = API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + '://') + '/ws';
+    const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
+    const wsUrl =
+      API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + "://") + "/ws";
     const ws = new window.WebSocket(wsUrl);
     wsRef.current = ws;
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data);
-        if (msg.type === organization?.id+'_incident_created' || msg.type === organization?.id+'_incident_updated') {
-          fetchIncidents();
+        console.log("websocket message is: ", msg);
+        if (msg.type === organization?.id + "_incident_created") {
+          setIncidents((prev) => [...prev, msg.incident]);
+        } else if (msg.type.includes(organization?.id + "_incident_updated")) {
+          setIncidents((prevIncidents) =>
+            prevIncidents.map((item) =>
+              item.id === msg.incident.id ? msg.incident : item
+            )
+          );
         }
       } catch (e) {
         // Ignore parse errors
@@ -68,46 +87,79 @@ export default function GetIncidentsPage() {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'open':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'in_progress':
-        return <Clock className="h-4 w-4" />;
-      case 'resolved':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'closed':
-        return <XCircle className="h-4 w-4" />;
+      case "investigating":
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+  
+      case "identified":
+        return <Clock className="h-4 w-4 text-orange-500" />;
+  
+      case "monitoring":
+        return <CircleCheckBig className="h-4 w-4 text-blue-500" />;
+  
+      case "resolved":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+  
+      case "maintenance":
+        return <Wrench className="h-4 w-4 text-purple-500" />;
+  
       default:
-        return <AlertCircle className="h-4 w-4" />;
+        return <XOctagon className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getStatusVariant = (status) => {
     switch (status) {
-      case 'open':
-        return 'destructive';
-      case 'in_progress':
-        return 'default';
-      case 'resolved':
-        return 'secondary';
-      case 'closed':
-        return 'outline';
+      case "open":
+        return "destructive"; 
+  
+      case "in_progress":
+        return "default"; 
+  
+      case "resolved":
+        return "success";
+  
+      case "closed":
+        return "ghost";
+  
       default:
-        return 'default';
+        return "outline"; 
     }
   };
 
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case "investigating":
+        return "bg-yellow-100 text-yellow-800 border border-yellow-200";
+  
+      case "identified":
+        return "bg-orange-100 text-orange-800 border border-orange-200";
+  
+      case "monitoring":
+        return "bg-blue-100 text-blue-800 border border-blue-200";
+  
+      case "resolved":
+        return "bg-green-100 text-green-800 border border-green-200";
+  
+      case "maintenance":
+        return "bg-purple-100 text-purple-800 border border-purple-200";
+  
+      default:
+        return "bg-gray-100 text-gray-800 border border-gray-200";
+    }
+  };
+  
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-2 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Incidents</h1>
@@ -115,14 +167,14 @@ export default function GetIncidentsPage() {
             Manage and track all system incidents
           </p>
         </div>
-        <Button onClick={() => navigate('/create-incident')} className="gap-2">
+        <Button onClick={() => navigate("/create-incident")} className="gap-2">
           <Plus className="h-4 w-4" />
           Create Incident
         </Button>
       </div>
 
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i}>
               <CardHeader className="space-y-2">
@@ -153,7 +205,10 @@ export default function GetIncidentsPage() {
           <p className="text-muted-foreground mb-4">
             Get started by creating your first incident report
           </p>
-          <Button onClick={() => navigate('/create-incident')} className="gap-2">
+          <Button
+            onClick={() => navigate("/create-incident")}
+            className="gap-2"
+          >
             <Plus className="h-4 w-4" />
             Create Incident
           </Button>
@@ -161,17 +216,21 @@ export default function GetIncidentsPage() {
       )}
 
       {incidents?.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {incidents.map((incident) => (
-            <Card key={incident.id} className="hover:shadow-lg transition-shadow duration-200">
+            <Card
+              key={incident.id}
+              className="hover:shadow-lg transition-shadow duration-200"
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
                   <CardTitle className="text-lg leading-6 line-clamp-2">
                     {incident.title}
                   </CardTitle>
-                  <Badge variant={getStatusVariant(incident.status)} className="gap-1 shrink-0">
+                  <Badge className={`gap-1 shrink-0 ${getStatusBadgeClass(incident.status)}`}>
+
                     {getStatusIcon(incident.status)}
-                    {incident.status.replace('_', ' ')}
+                    {incident.status.replace("_", " ")}
                   </Badge>
                 </div>
               </CardHeader>
@@ -180,19 +239,13 @@ export default function GetIncidentsPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {incident.description}
                   </p>
-                  {/* <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Priority:</span>
-                    <Badge variant={getPriorityVariant(incident.priority)} size="sm">
-                      {incident.priority}
-                    </Badge>
-                  </div> */}
                   <div className="text-xs text-muted-foreground">
                     Created {formatDate(incident?.createdAt)}
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full gap-2" 
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
                   onClick={() => navigate(`/get-incident/${incident.id}`)}
                 >
                   <Eye className="h-4 w-4" />
@@ -205,4 +258,4 @@ export default function GetIncidentsPage() {
       )}
     </div>
   );
-};
+}

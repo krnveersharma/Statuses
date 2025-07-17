@@ -7,15 +7,23 @@ import (
 	"github.com/lib/pq"
 )
 
-func AddService(db *sql.DB, serviceData Schemas.ServiceRequest, orgId, clerkId string) error {
-	query := "INSERT INTO services (name, status, clerk_org_id, created_by_clerk) VALUES ($1, $2, $3, $4)"
+func AddService(db *sql.DB, serviceData Schemas.ServiceRequest, orgId, clerkId string) (Schemas.Service, error) {
+	var service Schemas.Service
 
-	_, err := db.Exec(query, serviceData.Name, serviceData.Status, orgId, clerkId)
+	query := `
+		INSERT INTO services (name, status, clerk_org_id, created_by_clerk)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, name, status
+	`
+
+	err := db.QueryRow(query, serviceData.Name, serviceData.Status, orgId, clerkId).
+		Scan(&service.ID, &service.Name, &service.Status)
+
 	if err != nil {
-		return err
+		return Schemas.Service{}, err
 	}
 
-	return nil
+	return service, nil
 }
 
 func GetServicesAffected(db *sql.DB, incidentId string) ([]Schemas.Service, error) {

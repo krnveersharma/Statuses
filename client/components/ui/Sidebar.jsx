@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, PlusCircle, AlertTriangle, RefreshCw } from "lucide-react";
+import { Home, PlusCircle, AlertTriangle, RefreshCw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getuser } from "@/src/api/getUserInfo";
 import { useAuth } from "@clerk/clerk-react";
@@ -23,7 +23,7 @@ const navItems = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onClose }) {
   const { getToken } = useAuth();
   const location = useLocation();
   const [user, setUser] = useState(null);
@@ -41,7 +41,13 @@ export function Sidebar() {
     fetchUserRole();
   }, []);
   return (
-    <aside className="h-screen w-64 bg-white border-r flex flex-col py-6 px-4 shadow-sm">
+    <aside className="h-screen w-64 bg-white border-r flex flex-col py-6 px-4 shadow-sm relative">
+      {/* Close button for mobile */}
+      {onClose && (
+        <button className="absolute top-2 right-2 md:hidden p-2" onClick={onClose} aria-label="Close sidebar">
+          <X className="h-6 w-6" />
+        </button>
+      )}
       <div className="mb-8 flex items-center gap-2 px-2">
         <span className="font-bold text-lg tracking-tight">
           Status<span className="text-primary">es</span>
@@ -59,6 +65,7 @@ export function Sidebar() {
                   ? "bg-muted-foreground/10 text-primary"
                   : "text-muted-foreground"
               }`}
+              onClick={onClose}
             >
               {item.icon}
               {item.label}

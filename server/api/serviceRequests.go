@@ -34,7 +34,7 @@ func (a *Api) CreateService(ctx *gin.Context) {
 		return
 	}
 
-	err := dbrequests.AddService(a.DB, ServiceRequest, clerkUser.Org.ID, clerkUser.ID)
+	service, err := dbrequests.AddService(a.DB, ServiceRequest, clerkUser.Org.ID, clerkUser.ID)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -44,7 +44,7 @@ func (a *Api) CreateService(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"error": "New Service added"})
 
 	// Broadcast to websockets
-	websocketsHandler.CreateService(clerkUser.Org.ID, ServiceRequest)
+	websocketsHandler.CreateService(clerkUser.Org.ID, service)
 }
 
 func (a *Api) GetServices(ctx *gin.Context) {

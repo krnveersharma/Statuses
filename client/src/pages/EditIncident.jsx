@@ -124,12 +124,12 @@ const EditIncident = () => {
 
   return (
     <>
-      <Card className={"p-4"}>
+      <Card className={"p-4 sm:p-6"}>
         <h1 className="text-2xl font-bold mb-4">Edit Incidence: {incident?.title}</h1>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-6">
           <div>
             <label className="font-semibold block mb-1">Description</label>
             <textarea

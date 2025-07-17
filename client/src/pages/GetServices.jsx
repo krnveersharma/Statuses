@@ -48,10 +48,21 @@ export default function GetServicesPage() {
       try {
         const msg = JSON.parse(event.data);
         console.log("message from websockets is:",msg)
-        if (msg.type === organization?.id+'_service_created' || msg.type === organization?.id+'_service_updated') {
-          fetchServices();
+        if (msg.type === (organization?.id+'_service_created')) {
+          setServices([...services,...[msg.service]])
         }
+        else if(msg.type.includes(`${organization?.id}_service_updated_`)
+        ){
+          setServices(prevServices =>
+            prevServices.map(item =>
+              item.id === msg.service.id ? msg.service : item
+            )
+          );
+          
+        }
+
       } catch (e) {
+        console.log("fetching error")
       }
     };
     ws.onerror = () => {};
@@ -63,13 +74,13 @@ export default function GetServicesPage() {
 
   return (
     <>
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-xl font-semibold text-muted-foreground">All Services</h2>
         <Button onClick={() => navigate('/create-service')}>Create Service</Button>
       </div>
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {services?.length === 0 && !loading && <div>No services found.</div>}
         {services?.map((service) => (
           <Card key={service.id}>
