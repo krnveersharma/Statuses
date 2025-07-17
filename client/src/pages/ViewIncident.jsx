@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { Card } from '../../components/ui/Card';
@@ -9,6 +9,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const ViewIncident = () => {
   const { id } = useParams();
+  const wsRef = useRef(null);
   const navigate = useNavigate();
   const { getToken } = useAuth();
 
@@ -54,8 +55,31 @@ const ViewIncident = () => {
 
   useEffect(() => {
     if (id) {
+      console.log("id is: ",id)
       fetchIncident();
       fetchUserRole();
+      const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
+      const wsUrl = API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + '://') + '/ws';
+      const ws = new window.WebSocket(wsUrl);
+      wsRef.current = ws;
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          console.log("event triggered: ",event.data)
+          if (msg.type === 'incident_updated_'+id) {
+            console.log("edit event triggered 2")
+            fetchIncident();
+            fetchUserRole();
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      };
+      ws.onerror = () => {};
+      ws.onclose = () => {};
+      return () => {
+        ws.close();
+      };
     }
   }, [id]);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { Card } from "../../components/ui/Card";
@@ -11,6 +11,7 @@ const EditService = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
 
+  const wsRef=useRef(null)
   const [service, setService] = useState(null);
   const [form, setForm] = useState({
     name: "",
@@ -45,7 +46,31 @@ const EditService = () => {
       }
     };
 
-    if (id) fetchService();
+    if (id) {
+      fetchService();
+
+      const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
+      const wsUrl =
+        API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + "://") + "/ws";
+      const ws = new window.WebSocket(wsUrl);
+      wsRef.current = ws;
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "service_updated_" + id) {
+            console.log("edit event triggered");
+            fetchService();
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      };
+      ws.onerror = () => {};
+      ws.onclose = () => {};
+      return () => {
+        ws.close();
+      };
+    }
   }, [id]);
 
   const handleChange = (e) => {
@@ -71,7 +96,7 @@ const EditService = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          id:parseInt(id),
+          id: parseInt(id),
           ...form,
         }),
       });

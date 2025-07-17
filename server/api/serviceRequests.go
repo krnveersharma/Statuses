@@ -2,16 +2,16 @@ package api
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	dbrequests "github.com/krnveersharma/Statuses/dbRequests"
 	middlewares "github.com/krnveersharma/Statuses/midlewares"
-	"github.com/krnveersharma/Statuses/realtime"
 	Schemas "github.com/krnveersharma/Statuses/schemas"
+	"github.com/krnveersharma/Statuses/websocketsHandler"
 )
 
 func (a *Api) CreateService(ctx *gin.Context) {
@@ -44,11 +44,7 @@ func (a *Api) CreateService(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"error": "New Service added"})
 
 	// Broadcast to websockets
-	msg, _ := json.Marshal(map[string]interface{}{
-		"type":    "service_created",
-		"service": ServiceRequest,
-	})
-	realtime.Broadcast(msg)
+	websocketsHandler.CreateService(ServiceRequest)
 }
 
 func (a *Api) GetServices(ctx *gin.Context) {
@@ -149,9 +145,5 @@ func (a *Api) EditService(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Service Updated Successfully"})
 
 	// Broadcast to websockets
-	msg, _ := json.Marshal(map[string]interface{}{
-		"type":    "service_updated",
-		"service": service,
-	})
-	realtime.Broadcast(msg)
+	websocketsHandler.UpdateService(strconv.Itoa(service.ID), service)
 }

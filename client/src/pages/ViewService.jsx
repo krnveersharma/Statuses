@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { Card } from "../../components/ui/Card";
@@ -11,7 +11,7 @@ const ViewService = () => {
   const { id } = useParams();
   const { getToken } = useAuth();
   const navigate = useNavigate();
-
+  const wsRef = useRef(null);
   const [userRole, setUserRole] = useState("");
   const [userLoading, setUserLoading] = useState(true);
   const [service, setService] = useState(null);
@@ -53,30 +53,53 @@ const ViewService = () => {
     if (id) {
       fetchService();
       fetchUserRole();
+
+      const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
+      const wsUrl =
+        API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + "://") + "/ws";
+      const ws = new window.WebSocket(wsUrl);
+      wsRef.current = ws;
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "service_updated_" + id) {
+            console.log("edit event triggered");
+            fetchService();
+            fetchUserRole();
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      };
+      ws.onerror = () => {};
+      ws.onclose = () => {};
+      return () => {
+        ws.close();
+      };
     }
   }, [id]);
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-screen text-lg text-muted">
-          Loading service details...
-        </div>
+      <div className="flex items-center justify-center min-h-screen text-lg text-muted">
+        Loading service details...
+      </div>
     );
   }
 
   if (error) {
     return (
-        <div className="flex items-center justify-center min-h-screen text-red-500 text-lg">
-          {error}
-        </div>
+      <div className="flex items-center justify-center min-h-screen text-red-500 text-lg">
+        {error}
+      </div>
     );
   }
 
   if (!service) {
     return (
-        <div className="flex items-center justify-center min-h-screen text-gray-600">
-          Service not found.
-        </div>
+      <div className="flex items-center justify-center min-h-screen text-gray-600">
+        Service not found.
+      </div>
     );
   }
 
@@ -103,7 +126,8 @@ const ViewService = () => {
             <span className="font-semibold">Status:</span> {service.status}
           </div>
           <div>
-            <span className="font-semibold">Description:</span> {service.description}
+            <span className="font-semibold">Description:</span>{" "}
+            {service.description}
           </div>
           <div>
             <span className="font-semibold">Created At:</span>{" "}
@@ -112,7 +136,9 @@ const ViewService = () => {
         </div>
 
         <div className="pt-6">
-          <Button variant="outline" onClick={() => navigate("/get-services")}>Back to Services</Button>
+          <Button variant="outline" onClick={() => navigate("/get-services")}>
+            Back to Services
+          </Button>
         </div>
       </Card>
     </>

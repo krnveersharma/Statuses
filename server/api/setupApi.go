@@ -11,6 +11,7 @@ import (
 	"github.com/krnveersharma/Statuses/config"
 	dbconnection "github.com/krnveersharma/Statuses/dbConnection"
 	middlewares "github.com/krnveersharma/Statuses/midlewares"
+	"github.com/krnveersharma/Statuses/websocketsHandler"
 )
 
 type Api struct {
@@ -64,7 +65,7 @@ func SetupApi(config config.Config) error {
 	privateRoute.PUT("/edit-service", api.EditService)
 
 	// Add WebSocket endpoint
-	server.GET("/ws", WebSocketHandler)
+	server.GET("/ws", websocketsHandler.WebSocketHandler)
 
 	server.Run(config.Port)
 	return nil

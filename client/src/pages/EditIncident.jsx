@@ -1,5 +1,5 @@
 import { Layout } from "@/components/ui/Layout";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { Card } from "../../components/ui/Card";
@@ -21,6 +21,7 @@ const EditIncident = () => {
   const navigate = useNavigate();
   const { getToken } = useAuth();
 
+  const wsRef = useRef(null);
   const [incident, setIncident] = useState(null);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ const EditIncident = () => {
 
   // Load Incident
   const loadIncident = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const token = await getToken();
       const data = await fetchIncidentById(token, id);
@@ -42,8 +43,8 @@ const EditIncident = () => {
       });
     } catch (err) {
       setError(err.message || "Failed to fetch incident");
-    } finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,7 +91,30 @@ const EditIncident = () => {
   useEffect(() => {
     loadIncident();
     loadServices();
-    // eslint-disable-next-line
+    
+    const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
+    const wsUrl =
+      API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + "://") + "/ws";
+    const ws = new window.WebSocket(wsUrl);
+    wsRef.current = ws;
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        console.log("event triggered: ", event.data);
+        if (msg.type === "incident_updated_" + id) {
+          console.log("edit event triggered 2");
+          loadIncident();
+          loadServices();
+        }
+      } catch (e) {
+        // Ignore parse errors
+      }
+    };
+    ws.onerror = () => {};
+    ws.onclose = () => {};
+    return () => {
+      ws.close();
+    };
   }, [id]);
 
   if (loading) return <div>Loading...</div>;
@@ -148,9 +172,14 @@ const EditIncident = () => {
             <select
               className="w-full border rounded p-2"
               multiple
-              value={incident.linked_services.map((s) => s.service_id.toString())}
+              value={incident.linked_services.map((s) =>
+                s.service_id.toString()
+              )}
               onChange={(e) => {
-                const selectedServiceIds = Array.from(e.target.selectedOptions, (opt) => parseInt(opt.value));
+                const selectedServiceIds = Array.from(
+                  e.target.selectedOptions,
+                  (opt) => parseInt(opt.value)
+                );
                 const selectedServices = services.filter((s) =>
                   selectedServiceIds.includes(s.service_id)
                 );
@@ -159,7 +188,6 @@ const EditIncident = () => {
                   linked_services: selectedServices,
                 }));
               }}
-              
             >
               {services.map((s) => (
                 <option key={s.service_id} value={s.service_id}>

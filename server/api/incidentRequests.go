@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	dbrequests "github.com/krnveersharma/Statuses/dbRequests"
 	middlewares "github.com/krnveersharma/Statuses/midlewares"
-	"github.com/krnveersharma/Statuses/realtime"
 	Schemas "github.com/krnveersharma/Statuses/schemas"
+	"github.com/krnveersharma/Statuses/websocketsHandler"
 )
 
 func (a *Api) CreateIncident(ctx *gin.Context) {
@@ -62,11 +62,7 @@ func (a *Api) CreateIncident(ctx *gin.Context) {
 	a.UpdateIncidentUpdate(&newIncident, *clerkUser)
 
 	// Broadcast to websockets
-	msg, _ := json.Marshal(map[string]interface{}{
-		"type":     "incident_created",
-		"incident": newIncident,
-	})
-	realtime.Broadcast(msg)
+	websocketsHandler.CreateIncident(newIncident)
 
 	ctx.JSON(http.StatusCreated, gin.H{"message": "Incident created successfully"})
 }
@@ -172,11 +168,7 @@ func (a *Api) EditIncident(ctx *gin.Context) {
 	a.UpdateIncidentUpdate(&incident, *clerkUser)
 
 	// Broadcast to websockets
-	msg, _ := json.Marshal(map[string]interface{}{
-		"type":     "incident_updated",
-		"incident": incident,
-	})
-	realtime.Broadcast(msg)
+	websocketsHandler.UpdateIncident(incident.ID, incident)
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Incident updated successfully"})
 }
