@@ -194,7 +194,6 @@ func (a *Api) UpdateIncidentUpdate(incident *Schemas.EditInstance, clerkUser mid
 	jsonBytes, err := json.Marshal(Schemas.IncidentUpdate{
 		Title:          incident.Title,
 		Description:    incident.Description,
-		StartedAt:      incident.StartedAt,
 		LinkedServices: linkedServices,
 	})
 	if err != nil {
