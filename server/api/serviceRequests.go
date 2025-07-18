@@ -24,11 +24,6 @@ func (a *Api) CreateService(ctx *gin.Context) {
 	}
 	clerkUser := clerkUserRaw.(*middlewares.UserData)
 
-	if clerkUser.Org.Role != "admin" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Only admin can perform this action"})
-		return
-	}
-
 	if err := ctx.ShouldBindBodyWithJSON(&ServiceRequest); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
 		return

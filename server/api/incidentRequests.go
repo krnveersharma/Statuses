@@ -23,11 +23,6 @@ func (a *Api) CreateIncident(ctx *gin.Context) {
 	}
 	clerkUser := clerkUserRaw.(*middlewares.UserData)
 
-	if clerkUser.Org.Role != "admin" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Only admin can perform this action"})
-		return
-	}
-
 	if err := ctx.ShouldBindJSON(&incident); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
 		return
@@ -144,12 +139,6 @@ func (a *Api) EditIncident(ctx *gin.Context) {
 		return
 	}
 	clerkUser := clerkUserRaw.(*middlewares.UserData)
-
-	if clerkUser.Org.Role != "admin" {
-		log.Printf("[EditIncident] Unauthorized role: %s\n", clerkUser.Org.Role)
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Only admin can perform this action"})
-		return
-	}
 
 	if err := ctx.ShouldBindJSON(&incident); err != nil {
 		log.Printf("[EditIncident] Failed to bind JSON: %v\n", err)
