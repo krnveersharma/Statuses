@@ -102,3 +102,12 @@ func EditService(db *sql.DB, service Schemas.Service, orgId string) error {
 
 	return nil
 }
+
+func DeleteService(db *sql.DB, serviceID int, orgId string) error {
+	_, err := db.Exec("DELETE FROM service_incidents WHERE service_id = $1", serviceID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("DELETE FROM services WHERE id = $1 AND clerk_org_id = $2", serviceID, orgId)
+	return err
+}

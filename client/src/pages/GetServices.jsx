@@ -72,6 +72,13 @@ export default function GetServicesPage() {
           );
           
         }
+        else if(msg.type.includes(`${organization?.id}_service_deleted`)){
+          setServices(prevServices =>
+            prevServices.filter(item =>
+              `${organization?.id}_service_deleted_${item?.id}` != msg.type
+            )
+          );
+        }
 
       } catch (e) {
         console.log("fetching error")

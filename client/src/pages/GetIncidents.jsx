@@ -86,6 +86,12 @@ export default function GetIncidentsPage() {
               item.id === msg.incident.id ? msg.incident : item
             )
           );
+        }else if(msg.type.includes(`${organization?.id}_incident_deleted`)){
+          setIncidents(prevServices =>
+            prevServices.filter(item =>
+              `${organization?.id}_incident_deleted_${item?.id}` != msg.type
+            )
+          );
         }
       } catch (e) {
         // Ignore parse errors

@@ -4,6 +4,7 @@ import { useAuth, useOrganization } from "@clerk/clerk-react";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/button";
 import { getuser } from "../api/getUserInfo";
+import { RefreshCw, XCircle } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,8 +13,9 @@ const ViewService = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const wsRef = useRef(null);
-  const {organization}=useOrganization()
+  const { organization } = useOrganization();
 
+  const [deleting, setDeleting] = useState(false);
   const [userRole, setUserRole] = useState("");
   const [userLoading, setUserLoading] = useState(true);
   const [service, setService] = useState(null);
@@ -64,7 +66,7 @@ const ViewService = () => {
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          if (msg.type === organization?.id+"_service_updated_" + id) {
+          if (msg.type === organization?.id + "_service_updated_" + id) {
             fetchService();
           }
         } catch (e) {
@@ -103,6 +105,30 @@ const ViewService = () => {
     );
   }
 
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      const token = await getToken();
+
+      const res = await fetch(`${API_BASE_URL}/admin/delete-service/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete");
+      }
+      navigate("/")
+    } catch (error) {
+      console.log(error);
+      alert(error.message || "Delete failed");
+    } finally{
+      setDeleting(false)
+    }
+  };
   return (
     <>
       <Card className="p-4 sm:p-6 shadow-md rounded-2xl space-y-4 sm:space-y-6">
@@ -141,6 +167,28 @@ const ViewService = () => {
           </Button>
         </div>
       </Card>
+      {!userLoading && userRole === "admin" && (
+        <div className="flex justify-end mt-2">
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            className="gap-2"
+            disabled={deleting}
+          >
+            {deleting ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4" />
+                Delete Incident
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </>
   );
 };

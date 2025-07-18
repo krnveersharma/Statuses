@@ -63,6 +63,8 @@ func SetupApi(config config.Config) error {
 	privateRoute.POST("/create-incident", api.CreateIncident)
 	privateRoute.PUT("/edit-incident", api.EditIncident)
 	privateRoute.PUT("/edit-service", api.EditService)
+	privateRoute.DELETE("/delete-service/:id", api.DeleteService)
+	privateRoute.DELETE("/delete-incident/:id", api.DeleteIncident)
 
 	// Add WebSocket endpoint
 	server.GET("/ws", websocketsHandler.WebSocketHandler)

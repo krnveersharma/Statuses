@@ -1,80 +1,81 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth, useOrganization } from '@clerk/clerk-react';
-import { getuser } from '../api/getUserInfo';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Edit, 
-  RefreshCw, 
-  Calendar, 
-  User, 
-  Server, 
-  AlertCircle, 
-  Clock, 
-  CheckCircle, 
+import React, { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth, useOrganization } from "@clerk/clerk-react";
+import { getuser } from "../api/getUserInfo";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import {
+  Edit,
+  RefreshCw,
+  Calendar,
+  User,
+  Server,
+  AlertCircle,
+  Clock,
+  CheckCircle,
   XCircle,
   ArrowLeft,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Mock data for demonstration (remove when using real API)
 const mockIncident = {
-  id: 'INC-2024-001',
-  title: 'Database Connection Issues',
-  description: 'Multiple users reporting timeout errors when accessing the application. Database connections are being dropped intermittently.',
-  status: 'in_progress',
-  started_at: '2024-01-15T10:30:00Z',
+  id: "INC-2024-001",
+  title: "Database Connection Issues",
+  description:
+    "Multiple users reporting timeout errors when accessing the application. Database connections are being dropped intermittently.",
+  status: "in_progress",
+  started_at: "2024-01-15T10:30:00Z",
   resolved_at: null,
-  created_at: '2024-01-15T10:30:00Z',
-  updated_at: '2024-01-15T14:45:00Z',
+  created_at: "2024-01-15T10:30:00Z",
+  updated_at: "2024-01-15T14:45:00Z",
   linked_services: [
-    { id: 1, name: 'User Authentication Service', status: 'degraded' },
-    { id: 2, name: 'Main Database', status: 'down' },
-    { id: 3, name: 'API Gateway', status: 'operational' }
+    { id: 1, name: "User Authentication Service", status: "degraded" },
+    { id: 2, name: "Main Database", status: "down" },
+    { id: 3, name: "API Gateway", status: "operational" },
   ],
   logs: [
     {
       id: 1,
-      status: 'investigating',
-      created_at: '2024-01-15T10:30:00Z',
-      full_name: 'John Doe',
+      status: "investigating",
+      created_at: "2024-01-15T10:30:00Z",
+      full_name: "John Doe",
       message: JSON.stringify({
-        action: 'Initial investigation started',
-        details: 'Checking database connection logs',
-        affected_users: ['user1', 'user2', 'user3']
-      })
+        action: "Initial investigation started",
+        details: "Checking database connection logs",
+        affected_users: ["user1", "user2", "user3"],
+      }),
     },
     {
       id: 2,
-      status: 'in_progress',
-      created_at: '2024-01-15T11:15:00Z',
-      full_name: 'Jane Smith',
+      status: "in_progress",
+      created_at: "2024-01-15T11:15:00Z",
+      full_name: "Jane Smith",
       message: JSON.stringify({
-        action: 'Root cause identified',
-        details: 'Database connection pool exhaustion',
-        next_steps: 'Increasing connection pool size'
-      })
+        action: "Root cause identified",
+        details: "Database connection pool exhaustion",
+        next_steps: "Increasing connection pool size",
+      }),
     },
     {
       id: 3,
-      status: 'in_progress',
-      created_at: '2024-01-15T14:45:00Z',
-      full_name: 'Mike Johnson',
+      status: "in_progress",
+      created_at: "2024-01-15T14:45:00Z",
+      full_name: "Mike Johnson",
       message: JSON.stringify({
-        action: 'Mitigation deployed',
-        details: 'Increased connection pool from 50 to 100 connections',
-        monitoring: 'Observing system performance'
-      })
-    }
-  ]
+        action: "Mitigation deployed",
+        details: "Increased connection pool from 50 to 100 connections",
+        monitoring: "Observing system performance",
+      }),
+    },
+  ],
 };
 
 const ViewIncident = () => {
@@ -84,10 +85,11 @@ const ViewIncident = () => {
   const { getToken } = useAuth();
   const { organization } = useOrganization();
 
+  const [deleting, setDeleting] = useState(false);
   const [incident, setIncident] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [userRole, setUserRole] = useState('');
+  const [error, setError] = useState("");
+  const [userRole, setUserRole] = useState("");
   const [userLoading, setUserLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -95,9 +97,9 @@ const ViewIncident = () => {
     try {
       const token = await getToken();
       const data = await getuser(token);
-      setUserRole(data.message.org.rol); 
+      setUserRole(data.message.org.rol);
     } catch (err) {
-      console.error('Error fetching user info:', err);
+      console.error("Error fetching user info:", err);
     } finally {
       setUserLoading(false);
     }
@@ -105,7 +107,7 @@ const ViewIncident = () => {
 
   const fetchIncident = async () => {
     setLoading(true);
-    setError('');
+    setError("");
     try {
       const token = await getToken();
       const res = await fetch(`${API_BASE_URL}/user/get-incident/${id}`, {
@@ -114,12 +116,12 @@ const ViewIncident = () => {
         },
       });
 
-      if (!res.ok) throw new Error('Failed to fetch incident');
+      if (!res.ok) throw new Error("Failed to fetch incident");
 
       const data = await res.json();
       setIncident(data);
     } catch (err) {
-      setError(err.message || 'Unexpected error');
+      setError(err.message || "Unexpected error");
     } finally {
       setLoading(false);
     }
@@ -139,17 +141,18 @@ const ViewIncident = () => {
       console.log("id is: ", id);
       fetchIncident();
       fetchUserRole();
-      
-      const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
-      const wsUrl = API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + '://') + '/ws';
+
+      const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
+      const wsUrl =
+        API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + "://") + "/ws";
       const ws = new window.WebSocket(wsUrl);
       wsRef.current = ws;
-      
+
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
           console.log("event triggered: ", event.data);
-          if (msg.type === organization?.id + '_incident_updated_' + id) {
+          if (msg.type === organization?.id + "_incident_updated_" + id) {
             console.log("edit event triggered 2");
             fetchIncident();
             fetchUserRole();
@@ -158,10 +161,10 @@ const ViewIncident = () => {
           // Ignore parse errors
         }
       };
-      
+
       ws.onerror = () => {};
       ws.onclose = () => {};
-      
+
       return () => {
         ws.close();
       };
@@ -170,15 +173,15 @@ const ViewIncident = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'open':
+      case "open":
         return <AlertCircle className="h-4 w-4" />;
-      case 'investigating':
+      case "investigating":
         return <AlertCircle className="h-4 w-4" />;
-      case 'in_progress':
+      case "in_progress":
         return <Clock className="h-4 w-4" />;
-      case 'resolved':
+      case "resolved":
         return <CheckCircle className="h-4 w-4" />;
-      case 'closed':
+      case "closed":
         return <XCircle className="h-4 w-4" />;
       default:
         return <AlertCircle className="h-4 w-4" />;
@@ -187,87 +190,113 @@ const ViewIncident = () => {
 
   const getStatusVariant = (status) => {
     switch (status) {
-      case 'open':
-        return 'destructive';
-      case 'investigating':
-        return 'destructive';
-      case 'in_progress':
-        return 'default';
-      case 'resolved':
-        return 'secondary';
-      case 'closed':
-        return 'outline';
+      case "open":
+        return "destructive";
+      case "investigating":
+        return "destructive";
+      case "in_progress":
+        return "default";
+      case "resolved":
+        return "secondary";
+      case "closed":
+        return "outline";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getServiceStatusVariant = (status) => {
     switch (status) {
-      case 'operational':
-        return 'secondary';
-      case 'degraded':
-        return 'default';
-      case 'down':
-        return 'destructive';
+      case "operational":
+        return "secondary";
+      case "degraded":
+        return "default";
+      case "down":
+        return "destructive";
       default:
-        return 'outline';
+        return "outline";
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-      if (loading) {
-        return (
-          <div className="container mx-auto p-6 space-y-6">
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-8 w-8" />
-              <Skeleton className="h-8 w-48" />
-            </div>
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-64" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardContent>
-            </Card>
-          </div>
-        );
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      const token = await getToken();
+
+      const res = await fetch(`${API_BASE_URL}/admin/delete-incident/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete");
       }
 
-      if (error) {
-        return (
-          <div className="container mx-auto p-6">
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          </div>
-        );
-      }
+      navigate("/get-incidents");
+    } catch (error) {
+      console.log(error);
+      alert(error.message || "Delete failed");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
-      if (!incident) {
-        return (
-          <div className="container mx-auto p-6">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>No incident found with ID: {id}</AlertDescription>
-            </Alert>
-          </div>
-        );
-      }
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-48" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-64" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!incident) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>No incident found with ID: {id}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-2 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
@@ -277,14 +306,16 @@ const ViewIncident = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/get-incidents')}
+            onClick={() => navigate("/get-incidents")}
             className="gap-2 cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Incidents
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{incident?.title}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {incident?.title}
+            </h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -295,11 +326,16 @@ const ViewIncident = () => {
             disabled={refreshing}
             className="gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
-          {!userLoading && userRole === 'admin' && (
-            <Button onClick={() => navigate(`/edit-incident/${id}`)} className="gap-2">
+          {!userLoading && userRole === "admin" && (
+            <Button
+              onClick={() => navigate(`/edit-incident/${id}`)}
+              className="gap-2"
+            >
               <Edit className="h-4 w-4" />
               Edit
             </Button>
@@ -314,9 +350,12 @@ const ViewIncident = () => {
             <div className="space-y-2">
               <CardTitle className="text-2xl">{incident.title}</CardTitle>
               <div className="flex items-center gap-2">
-                <Badge variant={getStatusVariant(incident.status)} className="gap-1">
+                <Badge
+                  variant={getStatusVariant(incident.status)}
+                  className="gap-1"
+                >
                   {getStatusIcon(incident.status)}
-                  {incident.status.replace(/_/g, ' ')}
+                  {incident.status.replace(/_/g, " ")}
                 </Badge>
               </div>
             </div>
@@ -327,7 +366,7 @@ const ViewIncident = () => {
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
             <p className="text-muted-foreground leading-relaxed">
-              {incident.description || 'No description provided'}
+              {incident.description || "No description provided"}
             </p>
           </div>
 
@@ -389,16 +428,26 @@ const ViewIncident = () => {
               {incident.linked_services?.length > 0 ? (
                 <div className="space-y-2">
                   {incident.linked_services.map((service) => (
-                    <div key={service.id} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm font-medium">{service.name}</span>
-                      <Badge variant={getServiceStatusVariant(service.status)} size="sm">
+                    <div
+                      key={service.id}
+                      className="flex items-center justify-between p-2 border rounded"
+                    >
+                      <span className="text-sm font-medium">
+                        {service.name}
+                      </span>
+                      <Badge
+                        variant={getServiceStatusVariant(service.status)}
+                        size="sm"
+                      >
                         {service.status}
                       </Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">No services affected</p>
+                <p className="text-sm text-muted-foreground">
+                  No services affected
+                </p>
               )}
             </div>
           </div>
@@ -438,8 +487,11 @@ const ViewIncident = () => {
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <Badge variant={getStatusVariant(log.status)} size="sm">
-                              {log.status.replace(/_/g, ' ')}
+                            <Badge
+                              variant={getStatusVariant(log.status)}
+                              size="sm"
+                            >
+                              {log.status.replace(/_/g, " ")}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
                               {formatDate(log.created_at)}
@@ -447,19 +499,25 @@ const ViewIncident = () => {
                           </div>
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <User className="h-3 w-3" />
-                            {log.full_name || 'Unknown'}
+                            {log.full_name || "Unknown"}
                           </div>
                         </div>
                         <Card className="p-4">
                           <div className="space-y-2">
-                            {Object.entries(parsedMessage).map(([key, value]) => (
-                              <div key={key} className="text-sm">
-                                <span className="font-medium capitalize">{key.replace(/_/g, ' ')}:</span>{' '}
-                                <span className="text-muted-foreground">
-                                  {Array.isArray(value) ? value.join(', ') : value}
-                                </span>
-                              </div>
-                            ))}
+                            {Object.entries(parsedMessage).map(
+                              ([key, value]) => (
+                                <div key={key} className="text-sm">
+                                  <span className="font-medium capitalize">
+                                    {key.replace(/_/g, " ")}:
+                                  </span>{" "}
+                                  <span className="text-muted-foreground">
+                                    {Array.isArray(value)
+                                      ? value.join(", ")
+                                      : value}
+                                  </span>
+                                </div>
+                              )
+                            )}
                           </div>
                         </Card>
                       </div>
@@ -470,6 +528,28 @@ const ViewIncident = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+      {!userLoading && userRole === "admin" && (
+        <div className="flex justify-end">
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            className="gap-2"
+            disabled={deleting}
+          >
+            {deleting ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4" />
+                Delete Incident
+              </>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   );

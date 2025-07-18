@@ -162,6 +162,29 @@ func (a *Api) EditIncident(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "Incident updated successfully"})
 }
 
+func (a *Api) DeleteIncident(ctx *gin.Context) {
+	clerkUserRaw, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+	clerkUser := clerkUserRaw.(*middlewares.UserData)
+
+	incidentId := ctx.Param("id")
+	if incidentId == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Missing incident id"})
+		return
+	}
+	err := dbrequests.DeleteIncident(a.DB, incidentId, clerkUser.Org.ID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete incident", "details": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Incident deleted successfully"})
+
+	websocketsHandler.DeleteIncident(incidentId, clerkUser.Org.ID)
+}
+
 func (a *Api) UpdateIncidentUpdate(incident *Schemas.EditInstance, clerkUser middlewares.UserData) {
 	var linkedServices []string
 	for i := range incident.LinkedServices {

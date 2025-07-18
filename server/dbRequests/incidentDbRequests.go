@@ -193,3 +193,16 @@ func GetIncidentUpdates(db *sql.DB, incidentId string) ([]Schemas.IncidentUpdate
 
 	return incidentUpdates, nil
 }
+
+func DeleteIncident(db *sql.DB, incidentID string, orgId string) error {
+	_, err := db.Exec("DELETE FROM service_incidents WHERE incident_id = $1", incidentID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("DELETE FROM incident_updates WHERE incident_id = $1", incidentID)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("DELETE FROM incidents WHERE id = $1 AND clerk_org_id = $2", incidentID, orgId)
+	return err
+}

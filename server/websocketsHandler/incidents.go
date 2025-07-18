@@ -22,3 +22,10 @@ func CreateIncident(orgId string, newIncident Schemas.EditInstance) {
 	})
 	realtime.Broadcast(msg)
 }
+
+func DeleteIncident(incidentId, orgId string) {
+	msg, _ := json.Marshal(map[string]interface{}{
+		"type": orgId + "_incident_deleted_" + incidentId,
+	})
+	realtime.Broadcast(msg)
+}

@@ -22,3 +22,10 @@ func CreateService(orgId string, service Schemas.Service) {
 	})
 	realtime.Broadcast(msg)
 }
+
+func DeleteService(serviceId, orgId string) {
+	msg, _ := json.Marshal(map[string]interface{}{
+		"type": orgId + "_service_deleted_" + serviceId,
+	})
+	realtime.Broadcast(msg)
+}

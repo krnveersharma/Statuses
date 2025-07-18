@@ -142,3 +142,27 @@ func (a *Api) EditService(ctx *gin.Context) {
 	// Broadcast to websockets
 	websocketsHandler.UpdateService(strconv.Itoa(service.ID), clerkUser.Org.ID, service)
 }
+
+func (a *Api) DeleteService(ctx *gin.Context) {
+	clerkUserRaw, exists := ctx.Get("user")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
+		return
+	}
+	clerkUser := clerkUserRaw.(*middlewares.UserData)
+
+	serviceIdStr := ctx.Param("id")
+	serviceId, err := strconv.Atoi(serviceIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service id"})
+		return
+	}
+	err = dbrequests.DeleteService(a.DB, serviceId, clerkUser.Org.ID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete service", "details": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Service deleted successfully"})
+
+	websocketsHandler.DeleteService(strconv.Itoa(serviceId), clerkUser.Org.ID)
+}
