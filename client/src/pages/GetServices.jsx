@@ -15,7 +15,18 @@ export default function GetServicesPage() {
   const [error, setError] = useState('');
   const wsRef = useRef(null);
   const {organization}=useOrganization()
+  const [user, setUser] = useState(null);
 
+  const fetchUserRole = async () => {
+    try {
+      const token = await getToken();
+      const data = await getuser(token);
+      setUser(data.message);
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+    } finally {
+    }
+  };
   const fetchServices = async () => {
     setLoading(true);
     setError('');
@@ -40,6 +51,7 @@ export default function GetServicesPage() {
 
   useEffect(() => {
     fetchServices();
+    fetchUserRole();
     const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
     const wsUrl = API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + '://') + '/ws';
     const ws = new window.WebSocket(wsUrl);
@@ -76,7 +88,7 @@ export default function GetServicesPage() {
     <>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h2 className="text-xl font-semibold text-muted-foreground">All Services</h2>
-        <Button onClick={() => navigate('/create-service')}>Create Service</Button>
+        {user?.org?.rol=="admin"&&<Button onClick={() => navigate('/create-service')}>Create Service</Button>}
       </div>
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}

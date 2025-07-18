@@ -30,6 +30,18 @@ export default function GetIncidentsPage() {
   const [error, setError] = useState("");
   const wsRef = useRef(null);
   const { organization } = useOrganization();
+  const [user,setUser]=useState(null)
+
+  const fetchUserRole = async () => {
+    try {
+      const token = await getToken();
+      const data = await getuser(token);
+      setUser(data.message);
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+    } finally {
+    }
+  };
 
   const fetchIncidents = async () => {
     setLoading(true);
@@ -55,7 +67,8 @@ export default function GetIncidentsPage() {
 
   useEffect(() => {
     fetchIncidents();
-    // Setup WebSocket connection
+    fetchUserRole()
+
     const wsProtocol = API_BASE_URL.startsWith("https") ? "wss" : "ws";
     const wsUrl =
       API_BASE_URL.replace(/^http(s?):\/\//, wsProtocol + "://") + "/ws";
@@ -167,10 +180,10 @@ export default function GetIncidentsPage() {
             Manage and track all system incidents
           </p>
         </div>
-        <Button onClick={() => navigate("/create-incident")} className="gap-2">
+        {user?.org?.rol=="admin"&&<Button onClick={() => navigate("/create-incident")} className="gap-2">
           <Plus className="h-4 w-4" />
           Create Incident
-        </Button>
+        </Button>}
       </div>
 
       {loading && (
