@@ -61,7 +61,7 @@ export default function GetServicesPage() {
         const msg = JSON.parse(event.data);
         console.log("message from websockets is:",msg)
         if (msg.type === (organization?.id+'_service_created')) {
-          setServices([...services,...[msg.service]])
+          setServices((prev) => [...prev, msg.service]);
         }
         else if(msg.type.includes(`${organization?.id}_service_updated_`)
         ){
