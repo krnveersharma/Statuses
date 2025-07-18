@@ -22,8 +22,17 @@ function App() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="/sign-up" element={<SignUp />} />
+      <Route
+        path="/sign-in"
+        element={
+          <div className=" h-full items-center flex justify-center">
+            <SignIn />
+          </div>
+        }
+      />
+      <Route path="/sign-up" element={<div className=" h-full items-center flex justify-center">
+            <SignUp />
+          </div>} />
 
       {/* Protected routes */}
       <Route
