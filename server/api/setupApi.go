@@ -49,6 +49,10 @@ func SetupApi(config config.Config) error {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	server.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "Statuses API is running!"})
+	})
+
 	userRoutes := server.Group("/user", middlewares.GetUserInfo(service, "user"))
 
 	userRoutes.GET("/", api.getUser)
