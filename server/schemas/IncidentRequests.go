@@ -44,10 +44,9 @@ type IncidentTitles struct {
 }
 
 type IncidentUpdate struct {
-	Title          string    `json:"title"`
-	Description    string    `json:description""`
-	StartedAt      time.Time `json:"started_at"`
-	LinkedServices []string  `json:"linked_services"`
+	Title          string   `json:"title"`
+	Description    string   `json:description""`
+	LinkedServices []string `json:"linked_services"`
 }
 
 type IncidentUpdateData struct {

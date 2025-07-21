@@ -19,6 +19,7 @@ import {
   XOctagon,
   CircleCheckBig
 } from "lucide-react";
+import { formatDate } from "../../lib/utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -166,16 +167,7 @@ export default function GetIncidentsPage() {
         return "bg-gray-100 text-gray-800 border border-gray-200";
     }
   };
-  
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   return (
     <div className="container mx-auto p-2 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
@@ -259,7 +251,7 @@ export default function GetIncidentsPage() {
                     {incident.description}
                   </p>
                   <div className="text-xs text-muted-foreground">
-                    Created {formatDate(incident?.createdAt)}
+                    Created {formatDate(incident?.created_at)}
                   </div>
                 </div>
                 <Button

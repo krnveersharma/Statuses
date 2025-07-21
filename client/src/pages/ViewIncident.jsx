@@ -511,7 +511,7 @@ const ViewIncident = () => {
                                     {key.replace(/_/g, " ")}:
                                   </span>{" "}
                                   <span className="text-muted-foreground">
-                                    {Array.isArray(value)
+                                    {key=="created_at"?formatDate(value):Array.isArray(value)
                                       ? value.join(", ")
                                       : value}
                                   </span>

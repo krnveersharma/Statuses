@@ -65,16 +65,6 @@ function App() {
           </RequireAuth>
         }
       />
-      {/* <Route
-        path="/create-incident-update"
-        element={
-          <RequireAuth>
-            <Layout>
-              <CreateIncidentUpdatePage />
-            </Layout>
-          </RequireAuth>
-        }
-      /> */}
       <Route
         path="/get-services"
         element={

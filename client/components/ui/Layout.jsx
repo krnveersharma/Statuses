@@ -8,7 +8,7 @@ export function Layout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-muted relative">
-=      <div
+      <div
         className={`fixed inset-y-0 left-0 z-40 w-64 transition-transform duration-300 md:static md:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } md:block`}

@@ -41,7 +41,7 @@ export function Sidebar({ onClose }) {
     fetchUserRole();
   }, []);
   return (
-    <aside className="h-screen w-64 bg-white border-r flex flex-col py-6 px-4 shadow-sm relative">
+    <aside className="h-[100%] w-64 bg-white border-r flex flex-col py-6 px-4 shadow-sm relative">
       {/* Close button for mobile */}
       {onClose && (
         <button className="absolute top-2 right-2 md:hidden p-2" onClick={onClose} aria-label="Close sidebar">
